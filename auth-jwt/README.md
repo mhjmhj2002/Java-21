@@ -9,6 +9,11 @@ Projeto para controle de acesso para micro serviços, tecnologia usada:
 - H2
 - Lombok
 
+Pre-requisitos:
+- Jdk 21
+- Maven 3.9 ou superior
+- Postman
+
 Start do projeto:
 - Via cmd:
   - mvn clean install
