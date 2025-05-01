@@ -16,3 +16,11 @@ Start do projeto:
   
 Testar Projeto: 
 - Importar no Postman a collection: auth-jwt-jdk21.postman_collection.json localizada na raiz do projeto dentro do diretorio collection. 
+
+Configs:
+- No arquivo application.properties:
+  - A var security.jwt.secret-key define a secret key, deve ser um hash HMAC do tipo string de 256 bits
+    - Para gerar outra chave pode ser usado o site: https://www.devglan.com/online-tools/hmac-sha256-online
+  - A var security.jwt.expiration-time permite definir o tempo de validade do token em milis.
+  
+  
