@@ -22,5 +22,6 @@ Configs:
   - A var security.jwt.secret-key define a secret key, deve ser um hash HMAC do tipo string de 256 bits
     - Para gerar outra chave pode ser usado o site: https://www.devglan.com/online-tools/hmac-sha256-online
   - A var security.jwt.expiration-time permite definir o tempo de validade do token em milis.
+    - Para fins de teste por padrao está setado em 60k (um minuto).
   
   
