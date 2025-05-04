@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: auth-jwt
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        healthCheckPath: /health-check
+        healthCheckInterval: 20s
