@@ -57,6 +57,7 @@ public class SecurityConfiguration {
                   	authorizationManagerRequestMatcherRegistry
 //                  	.requestMatchers("/auth/**").permitAll()
                   	.requestMatchers("/user/**").authenticated()
+                  	.requestMatchers("/teste/**").authenticated()
                   	.anyRequest().permitAll())
           		.authenticationProvider(authenticationProvider)
           		.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
