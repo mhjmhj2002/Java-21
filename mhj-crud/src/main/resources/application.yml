@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: mhj-crud
+  jpa:
+    open-in-view: 'false'
+    hibernate:
+      ddl-auto: update
+security:
+  jwt:
+    expiration-time: ${TOKEN_SLA:60000}
+    secret-key: ${SECRET_KEY:3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b}
+server:
+  port: ${SERVER_PORT:8081}
+  cloud:
+    config:
+      url: http://localhost:8888
