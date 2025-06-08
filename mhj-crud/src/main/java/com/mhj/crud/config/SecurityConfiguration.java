@@ -56,7 +56,7 @@ public class SecurityConfiguration {
           		.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
                   	authorizationManagerRequestMatcherRegistry
 //                  	.requestMatchers("/auth/**").permitAll()
-                  	.requestMatchers("/user/**").authenticated()
+                  	.requestMatchers("/users/**").authenticated()
                   	.anyRequest().permitAll())
           		.authenticationProvider(authenticationProvider)
           		.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
