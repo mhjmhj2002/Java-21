@@ -23,4 +23,17 @@ public class UserService {
 
         return users;
     }
+
+	public User findUserById(Integer userId) {
+		return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found, id: " + userId));
+	}
+
+	public User saveUser(User user) {
+		return userRepository.save(user);
+	}
+
+	public void deleteById(Long userId) {
+		userRepository.deleteById(userId);
+		
+	}
 }

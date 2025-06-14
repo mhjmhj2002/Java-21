@@ -10,4 +10,6 @@ import com.mhj.crud.entity.User;
 @Repository
 public interface UserRepository extends CrudRepository<User, Integer> {
     Optional<User> findByEmail(String email);
+
+	void deleteById(Long userId);
 }
