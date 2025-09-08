@@ -7,6 +7,10 @@
     <link th:href="@{/css/style.css}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- WebSocket libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
     <div th:replace="fragments/header :: header"></div>
@@ -51,7 +55,7 @@
                         <a th:href="@{/batch/status}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>Voltar
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="submitButton">
                             <i class="fas fa-upload me-2"></i>Enviar Arquivo
                         </button>
                     </div>
@@ -76,19 +80,24 @@
     <div th:replace="fragments/footer :: footer"></div>
 
     <script>
+        let stompClient = null;
+        let currentProcessId = null;
+
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
+            const submitButton = document.getElementById('submitButton');
             
             if (!file) {
                 alert('Por favor, selecione um arquivo');
                 return;
             }
             
-            // Mostrar progresso
+            // Mostrar progresso e desabilitar botão
             document.getElementById('progressContainer').style.display = 'block';
+            submitButton.disabled = true;
             
             const formData = new FormData();
             formData.append('file', file);
@@ -97,45 +106,110 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                checkProgress(data.id);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro no upload: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(process => {
+                currentProcessId = process.id;
+                connectWebSocket(currentProcessId);
             })
             .catch(error => {
                 console.error('Erro no upload:', error);
                 document.getElementById('statusText').textContent = 'Erro no upload: ' + error.message;
+                submitButton.disabled = false;
             });
         });
         
-        function checkProgress(processId) {
-            fetch('/batch/status/' + processId)
-            .then(response => response.json())
-            .then(data => {
-                const progress = (data.processedRecords / data.totalRecords) * 100;
-                const progressBar = document.getElementById('progressBar');
-                progressBar.style.width = progress + '%';
-                progressBar.textContent = Math.round(progress) + '%';
+        function connectWebSocket(processId) {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            
+            stompClient.connect({}, function(frame) {
+                console.log('Conectado ao WebSocket: ' + frame);
                 
-                document.getElementById('statusText').textContent = data.status;
-                document.getElementById('processedRecords').textContent = data.processedRecords;
-                document.getElementById('totalRecords').textContent = data.totalRecords;
-                document.getElementById('successCount').textContent = data.successCount;
-                document.getElementById('errorCount').textContent = data.errorCount;
-                
-                if (data.status === 'PROCESSING') {
-                    setTimeout(() => checkProgress(processId), 2000);
-                } else if (data.status === 'COMPLETED') {
-                    document.getElementById('statusText').textContent = 'Processamento concluído!';
-                    // Redirecionar para status após 3 segundos
-                    setTimeout(() => {
-                        window.location.href = '/batch/status';
-                    }, 3000);
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao verificar progresso:', error);
-                setTimeout(() => checkProgress(processId), 2000);
+                stompClient.subscribe('/topic/progress/' + processId, function(message) {
+                    const data = JSON.parse(message.body);
+                    updateProgressUI(data);
+                    
+                    if (data.status === 'COMPLETED' || data.status === 'FAILED' || data.status === 'CANCELLED') {
+                        // Desconectar quando o processo terminar
+                        setTimeout(() => {
+                            if (stompClient !== null) {
+                                stompClient.disconnect();
+                                console.log('WebSocket desconectado');
+                            }
+                            
+                            // Redirecionar para status após conclusão
+                            if (data.status === 'COMPLETED') {
+                                setTimeout(() => {
+                                    window.location.href = '/batch/status';
+                                }, 3000);
+                            }
+                        }, 2000);
+                    }
+                });
+            }, function(error) {
+                console.error('Erro na conexão WebSocket:', error);
+                // Tentar reconectar após 2 segundos
+                setTimeout(() => connectWebSocket(processId), 2000);
             });
+        }
+        
+        function updateProgressUI(data) {
+            const progress = data.totalRecords > 0 ? 
+                (data.processedRecords / data.totalRecords) * 100 : 0;
+            
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = Math.round(progress) + '%';
+            
+            // Atualizar status
+            const statusText = getStatusText(data.status);
+            document.getElementById('statusText').textContent = statusText;
+            document.getElementById('processedRecords').textContent = data.processedRecords;
+            document.getElementById('totalRecords').textContent = data.totalRecords;
+            document.getElementById('successCount').textContent = data.successCount;
+            document.getElementById('errorCount').textContent = data.errorCount;
+            
+            // Atualizar aparência baseada no status
+            updateProgressBarStyle(data.status);
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'PROCESSING': 'Processando...',
+                'COMPLETED': 'Concluído!',
+                'FAILED': 'Falhou',
+                'CANCELLED': 'Cancelado'
+            };
+            return statusMap[status] || status;
+        }
+        
+        function updateProgressBarStyle(status) {
+            const progressBar = document.getElementById('progressBar');
+            
+            // Remover todas as classes de cor
+            progressBar.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+            
+            // Adicionar classe baseada no status
+            switch(status) {
+                case 'COMPLETED':
+                    progressBar.classList.add('bg-success');
+                    progressBar.classList.remove('progress-bar-animated');
+                    break;
+                case 'FAILED':
+                case 'CANCELLED':
+                    progressBar.classList.add('bg-danger');
+                    progressBar.classList.remove('progress-bar-animated');
+                    break;
+                case 'PROCESSING':
+                    progressBar.classList.add('bg-warning');
+                    progressBar.classList.add('progress-bar-animated');
+                    break;
+            }
         }
     </script>
 </body>
