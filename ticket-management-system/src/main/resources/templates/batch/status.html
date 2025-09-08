@@ -89,7 +89,7 @@
                                 <td>
                                     <div class="progress" style="height: 5px; width: 100px;">
                                         <div class="progress-bar" 
-                                             th:style="'width: ' + ${processo.processedRecords / processo.totalRecords * 100} + '%;'"
+                                             th:style="'width: ' + ${processo.totalRecords ?: 1 > 0 ? (processo.processedRecords / (processo.totalRecords ?: 1) * 100) : 0} + '%;'"
                                              th:classappend="${processo.status == 'COMPLETED'} ? 'bg-success' : (${processo.status == 'PROCESSING'} ? 'bg-warning' : 'bg-danger')">
                                         </div>
                                     </div>

@@ -1,5 +1,6 @@
 package com.example.ticketsystem.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ticketsystem.entity.BatchProcess;
 import com.example.ticketsystem.entity.BatchStatus;
@@ -44,58 +44,50 @@ public class BatchService {
 		return batchRepository.save(process);
 	}
 
-	@Async
-	public void processBatchWithWebSocket(MultipartFile file, BatchProcess process,
-			SimpMessagingTemplate messagingTemplate) {
-		try {
-			List<TicketData> tickets = readExcelFile(file);
-			process.setTotalRecords(tickets.size());
-			batchRepository.save(process);
-
-			// Enviar status inicial via WebSocket
-			messagingTemplate.convertAndSend("/topic/progress/" + process.getId(), process);
-
-			for (int i = 0; i < tickets.size(); i++) {
-				TicketData ticketData = tickets.get(i);
-				try {
-					// Processar cada ticket
-					Ticket ticket = convertToTicket(ticketData);
-					if (ticket != null) {
-						ticketService.save(ticket);
-						process.incrementSuccess();
-					} else {
-						process.incrementError();
-					}
-				} catch (Exception e) {
-					process.incrementError();
-				}
-
-				process.incrementProcessed();
-
-				// Atualizar a cada registro para melhor feedback
-				batchRepository.save(process);
-
-				// Enviar atualização via WebSocket
-				messagingTemplate.convertAndSend("/topic/progress/" + process.getId(), process);
-
-				// Pequena pausa para visualizar o progresso (opcional)
-				Thread.sleep(100);
-			}
-
-			process.completeProcess();
-			batchRepository.save(process);
-
-			// Enviar status final via WebSocket
-			messagingTemplate.convertAndSend("/topic/progress/" + process.getId(), process);
-
-		} catch (Exception e) {
-			process.failProcess(e.getMessage());
-			batchRepository.save(process);
-
-			// Enviar status de erro via WebSocket
-			messagingTemplate.convertAndSend("/topic/progress/" + process.getId(), process);
-		}
+	@Async("taskExecutor")
+	public void processBatchWithWebSocket(byte[] fileContent, String fileName, BatchProcess process, SimpMessagingTemplate messagingTemplate) {
+	    try {
+	        List<TicketData> tickets = readExcelFile(fileContent, fileName);
+	        process.setTotalRecords(tickets.size());
+	        batchRepository.save(process);
+	        messagingTemplate.convertAndSend("/topic/progress/" + process.getId(), process);
+	        
+	        // Processar em lotes para melhor performance
+	        for (int i = 0; i < tickets.size(); i++) {
+	            processTicket(tickets.get(i), process);
+	            
+	            // Atualizar a cada 10 registros para não sobrecarregar
+	            if (i % 10 == 0 || i == tickets.size() - 1) {
+	                batchRepository.save(process);
+	                messagingTemplate.convertAndSend("/topic/progress/" + process.getId(), process);
+	            }
+	        }
+	        
+	        process.completeProcess();
+	        batchRepository.save(process);
+	        messagingTemplate.convertAndSend("/topic/progress/" + process.getId(), process);
+	        
+	    } catch (Exception e) {
+	        process.failProcess(e.getMessage());
+	        batchRepository.save(process);
+	        messagingTemplate.convertAndSend("/topic/progress/" + process.getId(), process);
+	    }
 	}
+
+	private void processTicket(TicketData ticketData, BatchProcess process) {
+	    try {
+	        Ticket ticket = convertToTicket(ticketData);
+	        if (ticket != null) {
+	            ticketService.save(ticket);
+	            process.incrementSuccess();
+	        } else {
+	            process.incrementError();
+	        }
+	    } catch (Exception e) {
+	        process.incrementError();
+	    }
+	    process.incrementProcessed();
+	}	
 
 	// Mantenha os métodos existentes abaixo (getProcessStatus, getAllProcesses,
 	// etc.)
@@ -129,70 +121,70 @@ public class BatchService {
 		return batchRepository.findByStatusOrderByStartTimeDesc(status);
 	}
 
-	private List<TicketData> readExcelFile(MultipartFile file) throws IOException {
-		List<TicketData> tickets = new ArrayList<>();
-
-		try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-			Sheet sheet = workbook.getSheetAt(0);
-			Iterator<Row> rows = sheet.iterator();
-
-			// Pular cabeçalho se existir
-			if (rows.hasNext()) {
-				Row headerRow = rows.next();
-				// Verificar se é realmente um cabeçalho
-				if (!isHeaderRow(headerRow)) {
-					// Se não for cabeçalho, reiniciar o iterator
-					workbook.close();
-					try (Workbook newWorkbook = new XSSFWorkbook(file.getInputStream())) {
-						sheet = newWorkbook.getSheetAt(0);
-						rows = sheet.iterator();
-					}
-				}
-			}
-
-			while (rows.hasNext()) {
-				Row row = rows.next();
-				if (isEmptyRow(row))
-					continue;
-
-				TicketData ticketData = new TicketData();
-
-				// Coluna A: Título
-				Cell titleCell = row.getCell(0);
-				if (titleCell != null) {
-					ticketData.setTitulo(getCellValueAsString(titleCell));
-				}
-
-				// Coluna B: Descrição
-				Cell descriptionCell = row.getCell(1);
-				if (descriptionCell != null) {
-					ticketData.setDescricao(getCellValueAsString(descriptionCell));
-				}
-
-				// Coluna C: ID do Cliente
-				Cell clientIdCell = row.getCell(2);
-				if (clientIdCell != null) {
-					try {
-						ticketData.setClienteId((long) getCellValueAsDouble(clientIdCell));
-					} catch (NumberFormatException e) {
-						// Tentar converter de string para long
-						String cellValue = getCellValueAsString(clientIdCell);
-						if (cellValue != null && !cellValue.trim().isEmpty()) {
-							try {
-								ticketData.setClienteId(Long.parseLong(cellValue.trim()));
-							} catch (NumberFormatException ex) {
-								// Ignorar se não puder converter
-							}
-						}
-					}
-				}
-
-				tickets.add(ticketData);
-			}
-		}
-
-		return tickets;
-	}
+//	private List<TicketData> readExcelFile(MultipartFile file) throws IOException {
+//		List<TicketData> tickets = new ArrayList<>();
+//
+//		try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+//			Sheet sheet = workbook.getSheetAt(0);
+//			Iterator<Row> rows = sheet.iterator();
+//
+//			// Pular cabeçalho se existir
+//			if (rows.hasNext()) {
+//				Row headerRow = rows.next();
+//				// Verificar se é realmente um cabeçalho
+//				if (!isHeaderRow(headerRow)) {
+//					// Se não for cabeçalho, reiniciar o iterator
+//					workbook.close();
+//					try (Workbook newWorkbook = new XSSFWorkbook(file.getInputStream())) {
+//						sheet = newWorkbook.getSheetAt(0);
+//						rows = sheet.iterator();
+//					}
+//				}
+//			}
+//
+//			while (rows.hasNext()) {
+//				Row row = rows.next();
+//				if (isEmptyRow(row))
+//					continue;
+//
+//				TicketData ticketData = new TicketData();
+//
+//				// Coluna A: Título
+//				Cell titleCell = row.getCell(0);
+//				if (titleCell != null) {
+//					ticketData.setTitulo(getCellValueAsString(titleCell));
+//				}
+//
+//				// Coluna B: Descrição
+//				Cell descriptionCell = row.getCell(1);
+//				if (descriptionCell != null) {
+//					ticketData.setDescricao(getCellValueAsString(descriptionCell));
+//				}
+//
+//				// Coluna C: ID do Cliente
+//				Cell clientIdCell = row.getCell(2);
+//				if (clientIdCell != null) {
+//					try {
+//						ticketData.setClienteId((long) getCellValueAsDouble(clientIdCell));
+//					} catch (NumberFormatException e) {
+//						// Tentar converter de string para long
+//						String cellValue = getCellValueAsString(clientIdCell);
+//						if (cellValue != null && !cellValue.trim().isEmpty()) {
+//							try {
+//								ticketData.setClienteId(Long.parseLong(cellValue.trim()));
+//							} catch (NumberFormatException ex) {
+//								// Ignorar se não puder converter
+//							}
+//						}
+//					}
+//				}
+//
+//				tickets.add(ticketData);
+//			}
+//		}
+//
+//		return tickets;
+//	}
 
 	private boolean isHeaderRow(Row row) {
 		if (row == null)
@@ -307,5 +299,67 @@ public class BatchService {
 
 	public long getTotalErrorRecords() {
 		return batchRepository.findAll().stream().mapToInt(BatchProcess::getErrorCount).sum();
+	}
+	
+	// Novo método para ler arquivo a partir de bytes
+	private List<TicketData> readExcelFile(byte[] fileContent, String fileName) throws IOException {
+	    List<TicketData> tickets = new ArrayList<>();
+	    
+	    try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileContent))) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        Iterator<Row> rows = sheet.iterator();
+	        
+	        // Pular cabeçalho se existir
+	        if (rows.hasNext()) {
+	            Row headerRow = rows.next();
+	            if (!isHeaderRow(headerRow)) {
+	                // Se não for cabeçalho, reiniciar o processamento
+					try (Workbook newWorkbook = new XSSFWorkbook(new ByteArrayInputStream(fileContent))) {
+	                    sheet = newWorkbook.getSheetAt(0);
+	                    rows = sheet.iterator();
+	                }
+	            }
+	        }
+	        
+	        while (rows.hasNext()) {
+	            Row row = rows.next();
+	            if (isEmptyRow(row)) continue;
+	            
+	            TicketData ticketData = new TicketData();
+	            
+	            // Coluna A: Título
+	            Cell titleCell = row.getCell(0);
+	            if (titleCell != null) {
+	                ticketData.setTitulo(getCellValueAsString(titleCell));
+	            }
+	            
+	            // Coluna B: Descrição
+	            Cell descriptionCell = row.getCell(1);
+	            if (descriptionCell != null) {
+	                ticketData.setDescricao(getCellValueAsString(descriptionCell));
+	            }
+	            
+	            // Coluna C: ID do Cliente
+	            Cell clientIdCell = row.getCell(2);
+	            if (clientIdCell != null) {
+	                try {
+	                    ticketData.setClienteId((long) getCellValueAsDouble(clientIdCell));
+	                } catch (NumberFormatException e) {
+	                    String cellValue = getCellValueAsString(clientIdCell);
+	                    if (cellValue != null && !cellValue.trim().isEmpty()) {
+	                        try {
+	                            ticketData.setClienteId(Long.parseLong(cellValue.trim()));
+	                        } catch (NumberFormatException ex) {
+	                            // Ignorar se não puder converter
+	                        }
+	                    }
+	                }
+	            }
+	            
+	            tickets.add(ticketData);
+	        }
+	    }
+	    
+	    return tickets;
 	}
 }

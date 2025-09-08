@@ -36,20 +36,59 @@ public class BatchController {
 		return "batch/upload";
 	}
 
+//	@PostMapping("/upload")
+//	public ResponseEntity<BatchProcess> uploadFile(@RequestParam("file") MultipartFile file) {
+//		try {
+//			BatchProcess process = batchService.createProcess(file.getOriginalFilename());
+//
+//			// Iniciar processamento assíncrono
+//			CompletableFuture.runAsync(() -> {
+//				batchService.processBatchWithWebSocket(file, process, messagingTemplate);
+//			});
+//
+//			return ResponseEntity.ok(process);
+//		} catch (Exception e) {
+//			return ResponseEntity.internalServerError().body(null);
+//		}
+//	}
+	
 	@PostMapping("/upload")
-	public ResponseEntity<BatchProcess> uploadFile(@RequestParam("file") MultipartFile file) {
-		try {
-			BatchProcess process = batchService.createProcess(file.getOriginalFilename());
-
-			// Iniciar processamento assíncrono
-			CompletableFuture.runAsync(() -> {
-				batchService.processBatchWithWebSocket(file, process, messagingTemplate);
-			});
-
-			return ResponseEntity.ok(process);
-		} catch (Exception e) {
-			return ResponseEntity.internalServerError().body(null);
-		}
+	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
+	    try {
+	        if (file.isEmpty()) {
+	            return ResponseEntity.badRequest().body("Arquivo vazio");
+	        }
+	        
+	        if (!file.getOriginalFilename().toLowerCase().endsWith(".xlsx") && 
+	            !file.getOriginalFilename().toLowerCase().endsWith(".xls")) {
+	            return ResponseEntity.badRequest().body("Formato de arquivo inválido. Use .xlsx ou .xls");
+	        }
+	        
+	        // Salvar o conteúdo do arquivo em bytes antes de processar assincronamente
+	        byte[] fileContent = file.getBytes();
+	        String fileName = file.getOriginalFilename();
+	        
+	        BatchProcess process = batchService.createProcess(fileName);
+	        
+	        System.out.println("Processo criado com ID: " + process.getId());
+	        
+	        // Iniciar processamento assíncrono com o conteúdo do arquivo
+	        CompletableFuture.runAsync(() -> {
+	            try {
+	                batchService.processBatchWithWebSocket(fileContent, fileName, process, messagingTemplate);
+	            } catch (Exception e) {
+	                System.err.println("Erro no processamento assíncrono: " + e.getMessage());
+	                e.printStackTrace();
+	            }
+	        });
+	        
+	        return ResponseEntity.ok(process);
+	        
+	    } catch (Exception e) {
+	        System.err.println("Erro no upload: " + e.getMessage());
+	        e.printStackTrace();
+	        return ResponseEntity.internalServerError().body("Erro interno: " + e.getMessage());
+	    }
 	}
 
 	@GetMapping("/status")
