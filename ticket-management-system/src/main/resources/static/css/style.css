@@ -1,0 +1,87 @@
+/* Estilos customizados para o sistema */
+.hero-section {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+}
+
+.navbar-brand {
+    font-weight: 700;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+/* Upload drop zone */
+.drop-zone {
+    border: 2px dashed #6a11cb;
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s;
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+.drop-zone:hover {
+    background-color: #e9ecef;
+    border-color: #2575fc;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.bg-status-processing {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.bg-status-completed {
+    background-color: #198754;
+    color: #fff;
+}
+
+.bg-status-failed {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+}

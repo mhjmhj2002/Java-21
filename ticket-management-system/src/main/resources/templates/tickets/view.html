@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${ticket.titulo}">Visualizar Ticket</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <!-- Cabeçalho do Ticket -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 th:text="${ticket.titulo}">Título do Ticket</h1>
+                        <div class="d-flex align-items-center gap-3">
+                            <span th:classappend="${ticket.status == 'ABERTO'} ? 'bg-warning' : 
+                                                  ${ticket.status == 'RESOLVIDO'} ? 'bg-success' : 
+                                                  ${ticket.status == 'FECHADO'} ? 'bg-secondary' : 'bg-info'" 
+                                  class="badge status-badge" th:text="${ticket.status.descricao}">
+                                Status
+                            </span>
+                            <span class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                <span th:text="${#temporals.format(ticket.dataCriacao, 'dd/MM/yyyy HH:mm')}">
+                                    01/01/2023 10:30
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <a th:href="@{/tickets/editar/{id}(id=${ticket.id})}" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>Editar
+                        </a>
+                        <a th:href="@{/tickets}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Voltar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Informações do Ticket -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Descrição</h5>
+                            </div>
+                            <div class="card-body">
+                                <p th:text="${ticket.descricao ?: 'Nenhuma descrição fornecida.'}" class="card-text">
+                                    Descrição do ticket...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Informações</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <strong>Cliente:</strong>
+                                    <p th:text="${ticket.cliente.nome}">Nome do Cliente</p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Email:</strong>
+                                    <p th:text="${ticket.cliente.email}">email@cliente.com</p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Telefone:</strong>
+                                    <p th:text="${ticket.cliente.telefone ?: 'Não informado'}">(11) 99999-9999</p>
+                                </div>
+                                <div>
+                                    <strong>Última atualização:</strong>
+                                    <p th:text="${ticket.dataAtualizacao != null} ? 
+                                               ${#temporals.format(ticket.dataAtualizacao, 'dd/MM/yyyy HH:mm')} : 
+                                               'Nunca atualizado'">
+                                        01/01/2023 10:30
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <th:block th:fragment="footer">
+        <footer class="bg-dark text-white mt-5 py-4">
+            <div class="container text-center">
+                <p class="mb-0">Sistema de Gerenciamento de Tickets &copy; 2023</p>
+                <p class="mb-0">
+                    <small>Desenvolvido com Spring Boot, Java 21 e Thymeleaf</small>
+                </p>
+            </div>
+        </footer>
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script th:src="@{/js/script.js}"></script>
+    </th:block>
+</body>
+</html>
