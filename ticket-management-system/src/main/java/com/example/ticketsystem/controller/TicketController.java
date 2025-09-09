@@ -1,23 +1,29 @@
 package com.example.ticketsystem.controller;
 
-import com.example.ticketsystem.dto.TicketRequestDTO;
-import com.example.ticketsystem.mapper.TicketMapper;
-import com.example.ticketsystem.entity.Ticket;
-import com.example.ticketsystem.entity.StatusTicket;
-import com.example.ticketsystem.service.TicketService;
-import com.example.ticketsystem.service.ClienteService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.util.Arrays;
 import java.util.List;
 
-@Controller
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.example.ticketsystem.dto.TicketRequestDTO;
+import com.example.ticketsystem.entity.StatusTicket;
+import com.example.ticketsystem.entity.Ticket;
+import com.example.ticketsystem.mapper.TicketMapper;
+import com.example.ticketsystem.service.ClienteService;
+import com.example.ticketsystem.service.TicketService;
+
+import jakarta.validation.Valid;
+
+@RestController
 @RequestMapping("/tickets")
 public class TicketController {
 

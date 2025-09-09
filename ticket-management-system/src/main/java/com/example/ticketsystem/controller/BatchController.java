@@ -6,19 +6,21 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ticketsystem.entity.BatchProcess;
 import com.example.ticketsystem.service.BatchService;
 
-@Controller
+import io.swagger.v3.oas.annotations.Operation;
+
+@RestController
 @RequestMapping("/batch")
 public class BatchController {
 
@@ -35,23 +37,9 @@ public class BatchController {
 	public String uploadForm() {
 		return "batch/upload";
 	}
-
-//	@PostMapping("/upload")
-//	public ResponseEntity<BatchProcess> uploadFile(@RequestParam("file") MultipartFile file) {
-//		try {
-//			BatchProcess process = batchService.createProcess(file.getOriginalFilename());
-//
-//			// Iniciar processamento assíncrono
-//			CompletableFuture.runAsync(() -> {
-//				batchService.processBatchWithWebSocket(file, process, messagingTemplate);
-//			});
-//
-//			return ResponseEntity.ok(process);
-//		} catch (Exception e) {
-//			return ResponseEntity.internalServerError().body(null);
-//		}
-//	}
 	
+	@Operation(summary = "Faz upload de arquivo para processamento", 
+	           description = "Recebe um arquivo Excel (.xlsx ou .xls) para processamento assíncrono")
 	@PostMapping("/upload")
 	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
 	    try {
@@ -107,18 +95,21 @@ public class BatchController {
 		}
 	}
 
+	@Operation(summary = "Obtém status de todos os processos")
 	@GetMapping("/all")
 	public ResponseEntity<List<BatchProcess>> getAllProcesses() {
 		List<BatchProcess> processes = batchService.getAllProcesses();
 		return ResponseEntity.ok(processes);
 	}
 
+	@Operation(summary = "Obtém processos recentes")
 	@GetMapping("/recent")
 	public ResponseEntity<List<BatchProcess>> getRecentProcesses() {
 		List<BatchProcess> processes = batchService.getRecentProcesses(5);
 		return ResponseEntity.ok(processes);
 	}
 
+	@Operation(summary = "Cancela um processo")
 	@PostMapping("/cancel/{id}")
 	public ResponseEntity<Void> cancelProcess(@PathVariable Long id) {
 		try {
@@ -129,6 +120,7 @@ public class BatchController {
 		}
 	}
 
+	@Operation(summary = "Obtém estatísticas de processamento")
 	@GetMapping("/stats")
 	public ResponseEntity<String> getBatchStats() {
 		long totalProcessed = batchService.getTotalProcessedRecords();
