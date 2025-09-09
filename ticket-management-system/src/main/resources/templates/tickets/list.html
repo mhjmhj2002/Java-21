@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+
     <div th:replace="~{fragments/header :: header}"></div>
 
     <div class="container mt-4">
@@ -81,7 +82,7 @@
     <script>
         function confirmarExclusao(id) {
             if (confirm('Tem certeza que deseja excluir este ticket?')) {
-                fetch('/api/tickets/' + id, {
+                fetch('/tickets/' + id, {
                     method: 'DELETE'
                 })
                 .then(response => {

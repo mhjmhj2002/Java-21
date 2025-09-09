@@ -19,10 +19,10 @@
                     <div>
                         <h1 th:text="${ticket.titulo}">Título do Ticket</h1>
                         <div class="d-flex align-items-center gap-3">
-                            <span th:classappend="${ticket.status == 'ABERTO'} ? 'bg-warning' : 
-                                                  ${ticket.status == 'RESOLVIDO'} ? 'bg-success' : 
-                                                  ${ticket.status == 'FECHADO'} ? 'bg-secondary' : 'bg-info'" 
-                                  class="badge status-badge" th:text="${ticket.status.descricao}">
+                            <span th:class="${(ticket.status == 'ABERTO') ? 'badge bg-warning' : 
+                                            (ticket.status == 'RESOLVIDO') ? 'badge bg-success' : 
+                                            (ticket.status == 'FECHADO') ? 'badge bg-secondary' : 'badge bg-info'}"
+                                  class="badge status-badge" th:text="${ticket.status}">
                                 Status
                             </span>
                             <span class="text-muted">
@@ -51,7 +51,8 @@
                                 <h5 class="mb-0">Descrição</h5>
                             </div>
                             <div class="card-body">
-                                <p th:text="${ticket.descricao ?: 'Nenhuma descrição fornecida.'}" class="card-text">
+                                <p th:text="${ticket.descricao != null} ? ${ticket.descricao} : 'Nenhuma descrição fornecida.'" 
+                                   class="card-text">
                                     Descrição do ticket...
                                 </p>
                             </div>
@@ -66,15 +67,19 @@
                             <div class="card-body">
                                 <div class="mb-3">
                                     <strong>Cliente:</strong>
-                                    <p th:text="${ticket.cliente.nome}">Nome do Cliente</p>
+                                    <p th:text="${ticket.cliente != null} ? ${ticket.cliente.nome} : 'Não associado'">
+                                        Nome do Cliente
+                                    </p>
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3" th:if="${ticket.cliente != null}">
                                     <strong>Email:</strong>
                                     <p th:text="${ticket.cliente.email}">email@cliente.com</p>
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3" th:if="${ticket.cliente != null}">
                                     <strong>Telefone:</strong>
-                                    <p th:text="${ticket.cliente.telefone ?: 'Não informado'}">(11) 99999-9999</p>
+                                    <p th:text="${ticket.cliente.telefone != null} ? ${ticket.cliente.telefone} : 'Não informado'">
+                                        (11) 99999-9999
+                                    </p>
                                 </div>
                                 <div>
                                     <strong>Última atualização:</strong>
