@@ -1,0 +1,7 @@
+.card-title-clickable {
+    cursor: pointer;
+}
+
+.card-title-clickable:hover {
+    color: #0d6efd; /* Cor primária do Bootstrap */
+}
