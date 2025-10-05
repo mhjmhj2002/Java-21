@@ -10,6 +10,7 @@ import java.util.List;
  * Os controllers dependerão desta abstração, não da implementação concreta.
  */
 public interface PedidoService {
+	List<PedidoResponseDTO> listarTodos();
     PedidoResponseDTO criar(PedidoInputDTO pedidoInputDTO);
     PedidoResponseDTO buscarPorId(Long id);
     List<PedidoResponseDTO> listarPorCliente(Long clienteId);

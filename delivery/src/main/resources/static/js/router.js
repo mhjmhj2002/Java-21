@@ -1,8 +1,12 @@
-import { loadComponent, renderPaginaRestaurantes, renderPaginaPedidos, renderPaginaAcompanhamento, renderPaginaClientes } from './ui.js';
+import { loadComponent, renderPaginaDashboard, renderPaginaRestaurantes, renderPaginaPedidos, renderPaginaAcompanhamento, renderPaginaClientes } from './ui.js';
 
 
 // Mapeia o hash da URL para o arquivo da página correspondente
 const routes = {
+	'#dashboard': {
+		path: 'pages/dashboard.html',
+		onLoad: renderPaginaDashboard
+	},
 	'#restaurantes': {
 		path: 'pages/restaurantes.html',
 		onLoad: renderPaginaRestaurantes // Função a ser executada após carregar a página
@@ -23,8 +27,8 @@ const routes = {
 
 // Função principal para carregar a página
 export async function loadPage() {
-	// Pega o hash da URL ou define um padrão
-	const hash = window.location.hash || '#restaurantes';
+	// Pega o hash da URL ou define '#dashboard' como o padrão
+	const hash = window.location.hash || '#dashboard'; // MUDANÇA AQUI
 	const route = routes[hash];
 
 	const appContent = document.getElementById('app-content');

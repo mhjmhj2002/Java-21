@@ -616,3 +616,78 @@ export async function renderPaginaRestaurantes() {
     // --- Carregamento Inicial ---
     await carregarTabela();
 }
+
+// ===================================================================
+// LÓGICA DA PÁGINA DO DASHBOARD
+// ===================================================================
+
+export async function renderPaginaDashboard() {
+    const container = document.getElementById('dashboard-cards-container');
+    const spinner = document.getElementById('loading-spinner-dashboard');
+    const btnAtualizar = document.getElementById('btn-atualizar-dashboard');
+
+    // Mapeamento de status para ícones e cores
+    const statusConfig = {
+        RECEBIDO: { icone: 'bi-envelope-paper-fill', cor: 'secondary', texto: 'Recebidos' },
+        CONFIRMADO: { icone: 'bi-check2-circle', cor: 'info', texto: 'Confirmados' },
+        EM_PREPARO: { icone: 'bi-egg-fried', cor: 'warning', texto: 'Em Preparo' },
+        SAIU_PARA_ENTREGA: { icone: 'bi-truck', cor: 'primary', texto: 'Em Rota' },
+        ENTREGUE: { icone: 'bi-house-check-fill', cor: 'success', texto: 'Entregues' },
+        CANCELADO: { icone: 'bi-x-circle-fill', cor: 'danger', texto: 'Cancelados' }
+    };
+
+    async function carregarDashboard() {
+        spinner.style.display = 'block';
+        container.innerHTML = '';
+
+        try {
+            const pedidos = await api.pedidos.getAll();
+
+            // 1. Contar os pedidos por status
+            const contagemStatus = {
+                RECEBIDO: 0, CONFIRMADO: 0, EM_PREPARO: 0,
+                SAIU_PARA_ENTREGA: 0, ENTREGUE: 0, CANCELADO: 0
+            };
+
+            pedidos.forEach(pedido => {
+                if (contagemStatus.hasOwnProperty(pedido.status)) {
+                    contagemStatus[pedido.status]++;
+                }
+            });
+
+            // 2. Renderizar um card para cada status
+            for (const status in statusConfig) {
+                const config = statusConfig[status];
+                const quantidade = contagemStatus[status];
+
+                const cardHtml = `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card text-white bg-${config.cor} shadow-lg">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="me-3">
+                                        <h1 class="display-4 fw-bold">${quantidade}</h1>
+                                        <p class="card-text fs-5">${config.texto}</p>
+                                    </div>
+                                    <i class="bi ${config.icone}" style="font-size: 4rem; opacity: 0.7;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHtml;
+            }
+
+        } catch (error) {
+            container.innerHTML = `<div class="alert alert-danger w-100">Erro ao carregar o dashboard: ${error.message}</div>`;
+        } finally {
+            spinner.style.display = 'none';
+        }
+    }
+
+    // --- Eventos e Inicialização ---
+    btnAtualizar.addEventListener('click', carregarDashboard);
+
+    // Carrega o dashboard ao entrar na página
+    await carregarDashboard();
+}

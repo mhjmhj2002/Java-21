@@ -46,6 +46,7 @@ export const api = {
 		delete: (id) => request(`/clientes/${id}`, { method: 'DELETE' })
 	},
 	pedidos: {
+		getAll: () => request('/pedidos'),
 		create: (pedidoData) => request('/pedidos', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },

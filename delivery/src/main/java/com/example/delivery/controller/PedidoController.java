@@ -36,6 +36,12 @@ public class PedidoController {
     public PedidoController(PedidoService pedidoService) {
         this.pedidoService = pedidoService;
     }
+    
+    @GetMapping
+    @Operation(summary = "Lista todos os pedidos do sistema")
+    public ResponseEntity<List<PedidoResponseDTO>> listarTodos() {
+        return ResponseEntity.ok(pedidoService.listarTodos());
+    }
 
     @PostMapping
     public ResponseEntity<PedidoResponseDTO> criar(@RequestBody PedidoInputDTO pedidoInputDTO) {

@@ -36,6 +36,13 @@ public class PedidoServiceImpl implements PedidoService {
         this.produtoRepository = produtoRepository;
         this.pedidoMapper = pedidoMapper;
     }
+    
+    @Override
+    public List<PedidoResponseDTO> listarTodos() {
+        return pedidoRepository.findAll().stream()
+                .map(pedidoMapper::toResponseDTO)
+                .toList();
+    }
 
     @Override
     @Transactional // Garante que todas as operações de banco de dados ocorram em uma única transação.

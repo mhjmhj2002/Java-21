@@ -1,0 +1,21 @@
+<!-- Conteúdo da Página do Dashboard -->
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-speedometer2"></i> Dashboard de Pedidos</h1>
+        <button id="btn-atualizar-dashboard" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-clockwise"></i> Atualizar
+        </button>
+    </div>
+
+    <!-- Spinner de Carregamento Principal -->
+    <div id="loading-spinner-dashboard" class="text-center mt-5" style="display: none;">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+
+    <!-- Container para os Cards de Status -->
+    <div id="dashboard-cards-container" class="row g-4">
+        <!-- Os cards de status serão inseridos aqui pelo JavaScript -->
+    </div>
+</div>
