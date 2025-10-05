@@ -1,18 +1,33 @@
 package com.example.delivery.service.impl;
 
-import com.example.delivery.dto.*;
-import com.example.delivery.entity.*;
-import com.example.delivery.enums.StatusPedido;
-import com.example.delivery.mapper.PedidoMapper;
-import com.example.delivery.repository.*;
-import com.example.delivery.service.PedidoService;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.delivery.dto.ItemPedidoInputDTO;
+import com.example.delivery.dto.PedidoInputDTO;
+import com.example.delivery.dto.PedidoResponseDTO;
+import com.example.delivery.entity.Cliente;
+import com.example.delivery.entity.ItemPedido;
+import com.example.delivery.entity.Pedido;
+import com.example.delivery.entity.Produto;
+import com.example.delivery.entity.Restaurante;
+import com.example.delivery.enums.StatusPedido;
+import com.example.delivery.mapper.PedidoMapper;
+import com.example.delivery.repository.ClienteRepository;
+import com.example.delivery.repository.PedidoRepository;
+import com.example.delivery.repository.ProdutoRepository;
+import com.example.delivery.repository.RestauranteRepository;
+import com.example.delivery.service.PedidoService;
+import com.example.delivery.specification.PedidoSpecification;
+
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * SRP (Single Responsibility Principle):
@@ -165,5 +180,18 @@ public class PedidoServiceImpl implements PedidoService {
         pedido.setStatus(StatusPedido.CANCELADO);
         return pedidoMapper.toResponseDTO(pedidoRepository.save(pedido));
     }
+    
+    @Override
+    public Page<PedidoResponseDTO> buscar(Long clienteId, Long restauranteId, StatusPedido status, Pageable pageable) {
+        // Usa a classe PedidoSpecification para criar a query dinâmica
+        Specification<Pedido> spec = PedidoSpecification.comFiltros(clienteId, restauranteId, status);
+        
+        // Executa a busca no repositório com a especificação e a paginação
+        Page<Pedido> pedidos = pedidoRepository.findAll(spec, pageable);
+        
+        // Mapeia o resultado para o DTO de resposta
+        return pedidos.map(pedidoMapper::toResponseDTO);
+    }
+    
     
 }

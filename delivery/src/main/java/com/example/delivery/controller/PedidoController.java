@@ -2,6 +2,10 @@ package com.example.delivery.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +14,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.delivery.dto.PedidoInputDTO;
 import com.example.delivery.dto.PedidoResponseDTO;
+import com.example.delivery.enums.StatusPedido;
 import com.example.delivery.service.PedidoService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +47,19 @@ public class PedidoController {
     @Operation(summary = "Lista todos os pedidos do sistema")
     public ResponseEntity<List<PedidoResponseDTO>> listarTodos() {
         return ResponseEntity.ok(pedidoService.listarTodos());
+    }
+    
+    @GetMapping("/paginado")
+    @Operation(summary = "Lista todos os pedidos com filtros e paginação")
+    public ResponseEntity<Page<PedidoResponseDTO>> listar(
+            @RequestParam(required = false) Long clienteId,
+            @RequestParam(required = false) Long restauranteId,
+            @RequestParam(required = false) StatusPedido status,
+            @PageableDefault(size = 10, sort = "dataPedido", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        // Precisaremos de um novo método no serviço para lidar com a busca
+        Page<PedidoResponseDTO> pedidos = pedidoService.buscar(clienteId, restauranteId, status, pageable);
+        return ResponseEntity.ok(pedidos);
     }
 
     @PostMapping

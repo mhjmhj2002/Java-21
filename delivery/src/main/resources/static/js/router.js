@@ -1,4 +1,4 @@
-import { loadComponent, renderPaginaDashboard, renderPaginaRestaurantes, renderPaginaPedidos, renderPaginaAcompanhamento, renderPaginaClientes } from './ui.js';
+import { loadComponent, renderPaginaGerenciarPedidos, renderPaginaDashboard, renderPaginaRestaurantes, renderPaginaPedidos, renderPaginaAcompanhamento, renderPaginaClientes } from './ui.js';
 
 
 // Mapeia o hash da URL para o arquivo da página correspondente
@@ -22,6 +22,10 @@ const routes = {
 	'#acompanhamento': {
 		path: 'pages/acompanhamento.html',
 		onLoad: renderPaginaAcompanhamento
+	},
+	'#gerenciar-pedidos': {
+		path: 'pages/gerenciar-pedidos.html',
+		onLoad: renderPaginaGerenciarPedidos
 	}
 };
 

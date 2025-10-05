@@ -47,11 +47,18 @@ export const api = {
 	},
 	pedidos: {
 		getAll: () => request('/pedidos'),
+		// NOVO MÉTODO - Para a tela de Gerenciamento (retorna objeto Page)
+		buscarPaginado: (params) => {
+			const query = new URLSearchParams(params).toString();
+			// Aponta para o novo endpoint /paginado
+			return request(`/pedidos/paginado?${query}`);
+		},
 		create: (pedidoData) => request('/pedidos', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(pedidoData)
 		}),
+		getById: (id) => request(`/pedidos/${id}`),
 		getByCliente: (clienteId) => request(`/pedidos/cliente/${clienteId}`), // NOVO
 		// Funções para mudança de status
 		confirmar: (pedidoId) => request(`/pedidos/${pedidoId}/confirmar`, { method: 'PUT' }),

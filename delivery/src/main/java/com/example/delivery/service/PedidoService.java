@@ -1,8 +1,13 @@
 package com.example.delivery.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.example.delivery.dto.PedidoInputDTO;
 import com.example.delivery.dto.PedidoResponseDTO;
-import java.util.List;
+import com.example.delivery.enums.StatusPedido;
 
 /**
  * OCP (Open/Closed Principle) & DIP (Dependency Inversion Principle):
@@ -14,6 +19,7 @@ public interface PedidoService {
     PedidoResponseDTO criar(PedidoInputDTO pedidoInputDTO);
     PedidoResponseDTO buscarPorId(Long id);
     List<PedidoResponseDTO> listarPorCliente(Long clienteId);
+    Page<PedidoResponseDTO> buscar(Long clienteId, Long restauranteId, StatusPedido status, Pageable pageable); // NOVO MÉTODO
     
     /**
      * OCP (Open/Closed Principle):
