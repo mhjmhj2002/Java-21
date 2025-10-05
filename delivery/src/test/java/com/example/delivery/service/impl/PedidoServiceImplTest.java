@@ -1,5 +1,30 @@
 package com.example.delivery.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.example.delivery.dto.ItemPedidoInputDTO;
 import com.example.delivery.dto.PedidoInputDTO;
 import com.example.delivery.dto.PedidoResponseDTO;
@@ -13,24 +38,9 @@ import com.example.delivery.repository.ClienteRepository;
 import com.example.delivery.repository.PedidoRepository;
 import com.example.delivery.repository.ProdutoRepository;
 import com.example.delivery.repository.RestauranteRepository;
+import com.example.delivery.service.MessagingService;
+
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 /**
  * Testes unitários para a classe PedidoServiceImpl. O foco é testar a lógica de
@@ -51,6 +61,8 @@ class PedidoServiceImplTest {
 	private ProdutoRepository produtoRepository;
 	@Mock
 	private PedidoMapper pedidoMapper;
+	@Mock
+    private MessagingService messagingService;
 
 	// --- Instância real do serviço com mocks injetados ---
 	@InjectMocks
