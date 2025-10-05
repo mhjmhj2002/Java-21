@@ -13,4 +13,6 @@ public interface RestauranteService {
     List<RestauranteDTO> listarTodos();
     RestauranteDTO buscarPorId(Long id);
     RestauranteDTO criar(RestauranteDTO restauranteDTO);
+    RestauranteDTO atualizar(Long id, RestauranteDTO restauranteDTO);
+    void deletar(Long id);
 }

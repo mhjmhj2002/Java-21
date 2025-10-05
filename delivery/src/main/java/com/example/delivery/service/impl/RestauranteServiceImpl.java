@@ -1,12 +1,17 @@
 package com.example.delivery.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.delivery.dto.RestauranteDTO;
 import com.example.delivery.entity.Restaurante;
 import com.example.delivery.mapper.RestauranteMapper;
 import com.example.delivery.repository.RestauranteRepository;
 import com.example.delivery.service.RestauranteService;
-import org.springframework.stereotype.Service;
-import java.util.List;
+
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * SRP (Single Responsibility Principle):
@@ -48,5 +53,28 @@ public class RestauranteServiceImpl implements RestauranteService {
         Restaurante restaurante = restauranteMapper.toEntity(restauranteDTO);
         Restaurante restauranteSalvo = restauranteRepository.save(restaurante);
         return restauranteMapper.toDTO(restauranteSalvo);
+    }
+    
+    @Override
+    @Transactional
+    public RestauranteDTO atualizar(Long id, RestauranteDTO restauranteDTO) {
+        Restaurante restauranteExistente = restauranteRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurante não encontrado com id: " + id));
+
+        // Atualiza os dados da entidade com os dados do DTO
+        restauranteExistente.setNome(restauranteDTO.nome());
+        restauranteExistente.setEndereco(restauranteDTO.endereco());
+
+        Restaurante restauranteAtualizado = restauranteRepository.save(restauranteExistente);
+        return restauranteMapper.toDTO(restauranteAtualizado);
+    }
+
+    @Override
+    @Transactional
+    public void deletar(Long id) {
+        if (!restauranteRepository.existsById(id)) {
+            throw new EntityNotFoundException("Restaurante não encontrado com id: " + id);
+        }
+        restauranteRepository.deleteById(id);
     }
 }

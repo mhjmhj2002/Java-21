@@ -1,0 +1,60 @@
+<!-- Conteúdo da Página de Gerenciamento de Restaurantes -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Gerenciar Restaurantes</h1>
+    <button id="btn-novo-restaurante" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Novo Restaurante
+    </button>
+</div>
+
+<!-- Tabela para listar os restaurantes -->
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Endereço</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-restaurantes">
+            <!-- Linhas serão inseridas aqui pelo JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Spinner de Carregamento -->
+<div id="loading-spinner" class="text-center mt-4" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+    </div>
+</div>
+
+<!-- Modal para Criar/Editar Restaurante -->
+<div class="modal fade" id="restaurante-modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="restauranteModalLabel">Novo Restaurante</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="restaurante-form">
+                    <input type="hidden" id="restaurante-id">
+                    <div class="mb-3">
+                        <label for="restaurante-nome" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="restaurante-nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="restaurante-endereco" class="form-label">Endereço</label>
+                        <input type="text" class="form-control" id="restaurante-endereco" required>
+                    </div>
+                    <div class="modal-footer pb-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

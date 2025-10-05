@@ -44,4 +44,16 @@ public class RestauranteController {
         RestauranteDTO novoRestaurante = restauranteService.criar(restauranteDTO);
         return new ResponseEntity<>(novoRestaurante, HttpStatus.CREATED);
     }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<RestauranteDTO> atualizar(@PathVariable Long id, @RequestBody RestauranteDTO restauranteDTO) {
+        RestauranteDTO restauranteAtualizado = restauranteService.atualizar(id, restauranteDTO);
+        return ResponseEntity.ok(restauranteAtualizado);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        restauranteService.deletar(id);
+        return ResponseEntity.noContent().build(); // Retorna 204 No Content
+    }
 }

@@ -1,0 +1,60 @@
+<!-- Conteúdo da Página de Realizar Pedido -->
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="mb-4">Realizar um Novo Pedido</h1>
+
+            <!-- ETAPA 1: SELECIONAR CLIENTE E RESTAURANTE -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Passo 1: Cliente e Restaurante</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="select-cliente" class="form-label">Selecione o Cliente</label>
+                            <select id="select-cliente" class="form-select" required></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="select-restaurante" class="form-label">Selecione o Restaurante</label>
+                            <select id="select-restaurante" class="form-select" required></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ETAPA 2: SELECIONAR PRODUTOS (CARDÁPIO) -->
+            <!-- Esta seção aparecerá após a seleção de um restaurante -->
+            <div id="cardapio-section" class="card mb-4 shadow-sm d-none">
+                <div class="card-header">
+                    <h5 class="mb-0">Passo 2: Monte seu Carrinho</h5>
+                </div>
+                <div class="card-body">
+                    <div id="cardapio-lista" class="list-group">
+                        <!-- O cardápio do restaurante será carregado aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ETAPA 3: RESUMO DO PEDIDO E FINALIZAÇÃO -->
+            <!-- Esta seção aparecerá após adicionar o primeiro item ao carrinho -->
+            <div id="resumo-section" class="card mb-4 shadow-sm d-none">
+                <div class="card-header">
+                    <h5 class="mb-0">Passo 3: Resumo do Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <ul id="carrinho-lista" class="list-group mb-3">
+                        <!-- Itens do carrinho serão adicionados aqui -->
+                    </ul>
+                    <div class="d-flex justify-content-end align-items-center">
+                        <h4 class="me-3">Total: <span id="total-pedido" class="fw-bold">R$ 0.00</span></h4>
+                        <button id="btn-finalizar-pedido" class="btn btn-success btn-lg" disabled>
+                            <i class="bi bi-check-circle-fill"></i> Finalizar Pedido
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

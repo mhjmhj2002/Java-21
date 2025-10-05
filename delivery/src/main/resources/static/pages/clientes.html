@@ -1,0 +1,65 @@
+<!-- Conteúdo da Página de Gerenciamento de Clientes -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Gerenciar Clientes</h1>
+    <button id="btn-novo-cliente" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Novo Cliente
+    </button>
+</div>
+
+<!-- Tabela para listar os clientes -->
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-clientes">
+            <!-- Linhas serão inseridas aqui pelo JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Spinner de Carregamento -->
+<div id="loading-spinner" class="text-center mt-4" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+    </div>
+</div>
+
+<!-- Modal para Criar/Editar Cliente -->
+<div class="modal fade" id="cliente-modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clienteModalLabel">Novo Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="cliente-form">
+                    <input type="hidden" id="cliente-id">
+                    <div class="mb-3">
+                        <label for="cliente-nome" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="cliente-nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cliente-email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="cliente-email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cliente-telefone" class="form-label">Telefone</label>
+                        <input type="tel" class="form-control" id="cliente-telefone">
+                    </div>
+                    <div class="modal-footer pb-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
