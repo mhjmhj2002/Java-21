@@ -15,7 +15,8 @@ import java.util.List;
 public class Pedido {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pedido_seq_gen")
+    @SequenceGenerator(name = "pedido_seq_gen", sequenceName = "pedido_seq", allocationSize = 1, initialValue = 1000)
     private Long id;
 
     // Muitos pedidos para um cliente.

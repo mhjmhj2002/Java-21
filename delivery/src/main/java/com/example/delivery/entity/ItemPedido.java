@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,7 +20,8 @@ import lombok.Setter;
 public class ItemPedido {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_pedido_seq_gen")
+    @SequenceGenerator(name = "item_pedido_seq_gen", sequenceName = "item_pedido_seq", allocationSize = 1, initialValue = 1000)
     private Long id;
 
     // Muitos itens para um pedido.

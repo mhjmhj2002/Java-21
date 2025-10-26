@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,8 @@ import lombok.Setter;
 public class Restaurante {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "restaurante_seq_gen")
+    @SequenceGenerator(name = "restaurante_seq_gen", sequenceName = "restaurante_seq", allocationSize = 1, initialValue = 1000)
     private Long id;
 
     @Column(nullable = false)
