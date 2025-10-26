@@ -45,5 +45,17 @@ public interface ItemLoteRepository extends JpaRepository<ItemLote, Long> {
      * Retorna um Optional, pois pode não encontrar nenhum item.
      */
     Optional<ItemLote> findFirstByLoteId(String loteId);
+    
+    /**
+     * Conta quantos itens pertencem a um Lote pai específico.
+     * O nome "LoteId" instrui o Spring a usar o campo "id" da entidade "lote".
+     */
+    long countByLote_Id(Long lotePaiId);
+
+    /**
+     * Conta quantos itens de um Lote pai específico têm um determinado status.
+     * O nome "LoteId" e "Status" instrui o Spring a usar os campos corretos.
+     */
+    long countByLote_IdAndStatus(Long lotePaiId, StatusProcessamento status);
 
 }

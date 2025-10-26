@@ -12,10 +12,8 @@ import com.example.designation.config.RabbitMQConfig;
 import com.example.designation.dto.FaixaCepInputDTO;
 import com.example.designation.entity.ItemLote;
 import com.example.designation.entity.OperadorLogistico;
-import com.example.designation.entity.StatusLote;
 import com.example.designation.entity.StatusProcessamento;
 import com.example.designation.repository.ItemLoteRepository;
-import com.example.designation.repository.LoteRepository;
 import com.example.designation.repository.OperadorLogisticoRepository;
 
 /**
@@ -28,18 +26,15 @@ public class LoteProcessingService {
 
     private static final Logger log = LoggerFactory.getLogger(LoteProcessingService.class);
 
-    private final LoteRepository loteRepository;
     private final ItemLoteRepository itemLoteRepository;
     private final OperadorLogisticoRepository operadorRepository;
     private final FaixaCepService faixaCepService;
     private final RabbitTemplate rabbitTemplate;
 
-    public LoteProcessingService(LoteRepository loteRepository,
-                                 ItemLoteRepository itemLoteRepository,
+    public LoteProcessingService(ItemLoteRepository itemLoteRepository,
                                  OperadorLogisticoRepository operadorRepository,
                                  FaixaCepService faixaCepService,
                                  RabbitTemplate rabbitTemplate) {
-        this.loteRepository = loteRepository;
         this.itemLoteRepository = itemLoteRepository;
         this.operadorRepository = operadorRepository;
         this.faixaCepService = faixaCepService;
@@ -56,34 +51,17 @@ public class LoteProcessingService {
 
         final Long lotePaiId = itensPendentes.get(0).getLote().getId();
 
-        loteRepository.findById(lotePaiId).ifPresent(lotePai -> {
-            if (lotePai.getStatus() == StatusLote.PENDENTE) {
-                lotePai.setStatus(StatusLote.PROCESSANDO);
-                loteRepository.save(lotePai);
-            }
-        });
-
-        int sucessos = 0;
-        int erros = 0;
         for (ItemLote item : itensPendentes) {
-            if (processarRegistro(item)) {
-                sucessos++;
-            } else {
-                erros++;
-            }
+            processarRegistro(item);
         }
-
-        loteRepository.atualizarContadores(lotePaiId, sucessos, erros);
-        loteRepository.incrementarSubLotesConcluidos(lotePaiId);
-
-        log.info("Processamento do sub-lote {} concluído. Sucessos: {}, Erros: {}", loteId, sucessos, erros);
+        
+        log.info("Processamento do sub-lote {} concluído.", loteId);
 
         // Publica uma mensagem para a fila de verificação.
-        log.info("Enfileirando tarefa de verificação para o Lote Pai ID: {}", lotePaiId);
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_PRINCIPAL, RabbitMQConfig.QUEUE_VERIFICACAO_LOTE, lotePaiId);
     }
 
-    private boolean processarRegistro(ItemLote item) {
+    private void processarRegistro(ItemLote item) {
         try {
             OperadorLogistico operador = operadorRepository
                 .findByNome(item.getOperadorLogisticoNome())
@@ -100,18 +78,11 @@ public class LoteProcessingService {
             faixaCepService.criar(dto);
 
             item.setStatus(StatusProcessamento.PROCESSADO);
-            item.setMensagemErro(null);
             itemLoteRepository.save(item);
-            return true;
         } catch (Exception e) {
-        	if (!e.getMessage().contains("Operador logístico não encontrado")) {
-        		log.warn("Erro ao processar item {}: {}", item.getId(), e.getMessage());
-			}
-            item.setStatus(StatusProcessamento.ERRO);
-            String mensagemErro = e.getMessage() != null && e.getMessage().length() > 512 ? e.getMessage().substring(0, 511) : e.getMessage();
-            item.setMensagemErro(mensagemErro);
+        	item.setStatus(StatusProcessamento.ERRO);
+            item.setMensagemErro(e.getMessage().substring(0, Math.min(e.getMessage().length(), 512)));
             itemLoteRepository.save(item);
-            return false;
         }
     }
 }
