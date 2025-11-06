@@ -2,7 +2,7 @@ import pandas as pd
 import random
 
 # --- Configurações ---
-NUMERO_DE_REGISTROS = 10000
+NUMERO_DE_REGISTROS = 50000
 NOME_ARQUIVO_SAIDA = "faixas_cep_lote.xlsx"
 
 # --- Dados de Exemplo ---

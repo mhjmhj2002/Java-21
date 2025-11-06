@@ -16,7 +16,6 @@ public class RabbitMQConfig {
     public static final String EXCHANGE_PRINCIPAL = "lote.exchange.v1";
     public static final String QUEUE_LOTE_FAIXAS = "lote.faixas.v1";
     public static final String DEAD_LETTER_QUEUE = QUEUE_LOTE_FAIXAS + ".dlq";
-    public static final String QUEUE_VERIFICACAO_LOTE = "lote.verificacao.v1";
 
     @Bean
     public DirectExchange exchangePrincipal() {
@@ -48,15 +47,5 @@ public class RabbitMQConfig {
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
-    }
-    
-    @Bean
-    public Queue queueVerificacaoLote() {
-        return QueueBuilder.durable(QUEUE_VERIFICACAO_LOTE).build();
-    }
-
-    @Bean
-    public Binding bindingVerificacaoLote() {
-        return BindingBuilder.bind(queueVerificacaoLote()).to(exchangePrincipal()).with(QUEUE_VERIFICACAO_LOTE);
     }
 }

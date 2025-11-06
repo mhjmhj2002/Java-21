@@ -11,4 +11,5 @@ public interface FaixaCepService {
     FaixaCepResponseDTO buscarPorId(Long id);
     FaixaCepResponseDTO atualizar(Long id, FaixaCepInputDTO dto);
     void deletar(Long id);
+    boolean existeSobreposicao(FaixaCepInputDTO dto);
 }

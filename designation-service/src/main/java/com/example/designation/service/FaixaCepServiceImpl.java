@@ -97,6 +97,14 @@ public class FaixaCepServiceImpl implements FaixaCepService {
 
 	}
 
-	// Implementar os outros métodos (buscarPorId, atualizar, deletar) seguindo o
-	// mesmo padrão...
+	/**
+	 * Implementação do método de verificação que não lança exceção. Usado pelo
+	 * processamento em lote para evitar rollbacks.
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public boolean existeSobreposicao(FaixaCepInputDTO dto) {
+		// Reutiliza a query que você já criou no repositório.
+		return faixaCepRepository.existsOverlappingRange(dto.getCepInicial(), dto.getCepFinal());
+	}
 }

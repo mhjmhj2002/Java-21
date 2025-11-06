@@ -14,6 +14,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.designation.aggregator.LoteProgressAggregator;
 import com.example.designation.config.RabbitMQConfig;
 import com.example.designation.entity.ItemLote;
 import com.example.designation.entity.Lote;
@@ -27,12 +28,14 @@ public class LoteUploadService {
 	private final LoteRepository loteRepository;
 	private final SubLoteService subLoteService;
 	private final RabbitTemplate rabbitTemplate; // INJETAR O RABBITTEMPLATE AQUI
+	private final LoteProgressAggregator progressAggregator;
 
 	public LoteUploadService(LoteRepository loteRepository, SubLoteService subLoteService,
-			RabbitTemplate rabbitTemplate) { // Adicionar ao construtor
+			RabbitTemplate rabbitTemplate, LoteProgressAggregator progressAggregator) { // Adicionar ao construtor
 		this.loteRepository = loteRepository;
 		this.subLoteService = subLoteService;
 		this.rabbitTemplate = rabbitTemplate;
+		this.progressAggregator = progressAggregator;
 	}
 
 	/**
@@ -98,6 +101,8 @@ public class LoteUploadService {
         // A transação do 'processarUpload' termina aqui. Se tudo deu certo,
         // os dados estão no banco. Agora, podemos enviar as mensagens com segurança.
         enviarMensagensParaFila(mensagensParaFila);
+        
+        progressAggregator.iniciarLote(lotePai);
 
 		return lotePai;
 	}
